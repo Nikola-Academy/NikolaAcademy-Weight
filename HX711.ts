@@ -12,6 +12,7 @@ namespace HX711 {
   let OFFSET: number = 0; // used for tare weight
   let SCALE: number = 1; // used to return weight in grams, kg, ounces, whatever
   let CAL_RATIO: number = 1.0;
+  let TYPE: number = 0;
 
   /**
    * Query data from HX711 module.
@@ -23,11 +24,12 @@ namespace HX711 {
    * @param pinDOUT pin at which the HX data line is connected
    * @param pinPD_SCK pin at which the HX data line is connected
    */
-  //% blockId="HX711_BEGIN" block="DT %pinDOUT| SCK %pinPD_SCK| begin"
+  //% blockId="HX711_BEGIN" block="DT %pinDOUT| SCK %pinPD_SCK| TYPE %type| begin"
   //% weight=100 blockGap=8
-  export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
+  export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin, type: number): void {
     PD_SCK = pinPD_SCK;
     DOUT = pinDOUT;
+    TYPE = type;
 
     set_gain(128); //default gain 128
   }
@@ -119,8 +121,13 @@ namespace HX711 {
       filler = 0x00;
     }
 
+    if (TYPE == 0) {
+      data[2] = data[2] ^ 0x80 //shift MSB
+    }
+
     // Construct a 32-bit signed integer
     value = (filler << 24) | (data[2] << 16) | (data[1] << 8) | data[0];
+
 
     return value;
   }
@@ -193,13 +200,8 @@ namespace HX711 {
     //let ceros: string = ""
 
     valor = (get_value(times) * CAL_RATIO) / SCALE;
-    /* if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 0) {
-            ceros = "00"
-         } else if (Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString().length == 1) {
-            ceros = "0"
-         }
-    valor_string = "" + Math.trunc(valor).toString() + "." + ceros + Math.abs(Math.round((valor - Math.trunc(valor)) * 100)).toString()
-     */
+    valor = Math.round(valor * 100) / 100;
+    
     return valor;
   }
 
