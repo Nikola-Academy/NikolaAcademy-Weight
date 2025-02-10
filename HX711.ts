@@ -12,7 +12,6 @@ namespace HX711 {
   let OFFSET: number = 0; // used for tare weight
   let SCALE: number = 1; // used to return weight in grams, kg, ounces, whatever
   let CAL_RATIO: number = 1.0;
-  let TYPE: number = 0;
 
   /**
    * Query data from HX711 module.
@@ -24,12 +23,12 @@ namespace HX711 {
    * @param pinDOUT pin at which the HX data line is connected
    * @param pinPD_SCK pin at which the HX data line is connected
    */
-  //% blockId="HX711_BEGIN" block="DT %pinDOUT| SCK %pinPD_SCK| TYPE %type| begin"
+  //% blockId="HX711_BEGIN" block="DT %pinDOUT| SCK %pinPD_SCK| begin"
   //% weight=100 blockGap=8
-  export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin, type: number): void {
+
+  export function begin(pinDOUT: DigitalPin, pinPD_SCK: DigitalPin): void {
     PD_SCK = pinPD_SCK;
     DOUT = pinDOUT;
-    TYPE = type;
 
     set_gain(128); //default gain 128
   }
@@ -119,10 +118,6 @@ namespace HX711 {
       filler = 0xff;
     } else {
       filler = 0x00;
-    }
-
-    if (TYPE == 0) {
-      data[2] = data[2] ^ 0x80 //shift MSB
     }
 
     // Construct a 32-bit signed integer
